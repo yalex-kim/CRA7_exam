@@ -22,7 +22,8 @@ const int ATTENDANCE_DATA_SIZE = 500;
 
 class AttendanceAnalyzerTest : public ::testing::Test {
 protected:
-	AttendanceManager attendManager;
+	AttendancePolicyInterface* policy = new AttendancePolicy();
+	AttendanceManager attendManager{policy};
 <span style = "background-color:#dfd">	void SetUp() override {
 		attendManager.clearAttendanceData();
 	}
@@ -199,7 +200,7 @@ public:
 <span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();
 	attendManager.calculateBonusPoints();</span>
 
-<span style = "background-color:#dfd">	attendManager.calculateGrade();</span>
+<span style = "background-color:#dfd">	attendManager.calculateGrades();</span>
 
 <span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getPointsByName("Alice"), 72);
 	EXPECT_EQ(attendManager.getGradeByName("Alice"), GRADE_GOLD);</span>
@@ -228,7 +229,7 @@ public:
 
 <span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();
 	attendManager.calculateBonusPoints();
-	attendManager.calculateGrade();
+	attendManager.calculateGrades();
 	EXPECT_NO_THROW(attendManager.printAttendanceDataWithGrade());
 }</span>
 
@@ -248,7 +249,7 @@ public:
 
 <span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();
 	attendManager.calculateBonusPoints();
-	attendManager.calculateGrade();
+	attendManager.calculateGrades();
 	EXPECT_NO_THROW(attendManager.printRemovedPlayer());
 }</span>
 

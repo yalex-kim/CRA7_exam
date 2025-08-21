@@ -16,6 +16,8 @@
 
 using namespace std;
 
+///  AttendanceManager ///
+
 <span style = "background-color:#dfd">void AttendanceManager::clearAttendanceData() {
 	idMapOfName.clear();
 	for (int i = 0; i &lt; MAX_ID_CNT; i++) {
@@ -34,20 +36,6 @@ using namespace std;
 	if (idMapOfName.count(name) == 0) {
 		idMapOfName.insert({ name, idMapOfName.size() + 1 });
 		names[idMapOfName.size()] = name;</span>
-	}
-<span style = "background-color:#dfd">}</span>
-
-<span style = "background-color:#dfd">int AttendanceManager::getPointOfDayIndex(int indexDayOfWeek) {
-	if (indexDayOfWeek == MONDAY || indexDayOfWeek == TUESDAY || indexDayOfWeek == THURSDAY || indexDayOfWeek == FRIDAY) {
-		return 1;</span>
-	}
-
-<span style = "background-color:#dfd">	if (indexDayOfWeek == WEDNESDAY) {
-		return 3;</span>
-	}
-
-<span style = "background-color:#dfd">	if (indexDayOfWeek == SATURDAY || indexDayOfWeek == SUNDAY) {
-		return 2;</span>
 	}
 <span style = "background-color:#dfd">}</span>
 
@@ -117,7 +105,7 @@ using namespace std;
 <span style = "background-color:#dfd">void AttendanceManager::calculateAttendancePoints() {
 	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
 		for (int indexDayOfWeek = 0; indexDayOfWeek &lt; MAX_DAY_OF_WEEK; indexDayOfWeek++) {
-			points[id] += countDayOfWeek[id][indexDayOfWeek] * getPointOfDayIndex(indexDayOfWeek);
+			points[id] += countDayOfWeek[id][indexDayOfWeek] * policy-&gt;getPointForDayOfWeek(indexDayOfWeek);
 		}
 	}
 }</span>
@@ -137,31 +125,7 @@ void AttendanceManager::registerAttendanceDataFromFile(string inputFileName, int
 	}
 }</span>
 
-<span style = "background-color:#dfd">void AttendanceManager::calculateBonusPoints() {
-	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
-		if (countDayOfWeek[id][2] &gt;= ATTENDANCE_BONUS_DAYS) {
-			points[id] += ATTENDANCE_BONUS_POINT;</span>
-		}
 
-<span style = "background-color:#dfd">		if (countDayOfWeek[id][5] + countDayOfWeek[id][6] &gt;= ATTENDANCE_BONUS_DAYS) {
-			points[id] += ATTENDANCE_BONUS_POINT;</span>
-		}
-<span style = "background-color:#dfd">	}
-}</span>
-
-<span style = "background-color:#dfd">void AttendanceManager::calculateGrade() {
-	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
-		if (points[id] &gt;= POINT_FOR_GOLD_GRADE) {
-			grade[id] = GRADE_GOLD;
-		}
-		else if (points[id] &gt;= POINT_FOR_SILVER_GRADE) {
-			grade[id] = GRADE_SILVER;
-		}</span>
-		else {
-<span style = "background-color:#dfd">			grade[id] = GRADE_NORMAL;</span>
-		}
-<span style = "background-color:#dfd">	}
-}</span>
 
 <span style = "background-color:#dfd">void AttendanceManager::printAttendanceDataWithGrade() {
 	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
@@ -176,23 +140,36 @@ void AttendanceManager::registerAttendanceDataFromFile(string inputFileName, int
 <span style = "background-color:#dfd">	}
 }</span>
 
+
 <span style = "background-color:#dfd">void AttendanceManager::printRemovedPlayer() {
 	std::cout &lt;&lt; "\n";
 	std::cout &lt;&lt; "Removed player\n";
 	std::cout &lt;&lt; "==============\n";
-	for (int id = 1; id &lt;= idMapOfName.size(); id++) {</span>
-
-<span style = "background-color:#dfd">		if (grade[id] != 1 &amp;&amp; grade[id] != 2 &amp;&amp; countOfWednesday[id] == 0 &amp;&amp; countOfweekend[id] == 0) {
+	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
+		if (policy-&gt;isEliminationCandidate(grade[id], countDayOfWeek[id])) {
 			std::cout &lt;&lt; names[id] &lt;&lt; "\n";</span>
 		}
 <span style = "background-color:#dfd">	}
 }</span>
 
+<span style = "background-color:#dfd">void AttendanceManager::calculateBonusPoints() {
+	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
+		int bonusPoints = policy-&gt;getBonusPoint(countDayOfWeek[id]);
+		points[id] += bonusPoints;
+	}
+}</span>
+
+
+<span style = "background-color:#dfd">void AttendanceManager::calculateGrades() {
+	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
+		grade[id] = policy-&gt;getGrade(points[id]);
+	}
+}</span>
+
 <span style = "background-color:#dfd">void AttendanceManager::analyzeAttendanceData() {
 	calculateAttendancePoints();
-	calculateBonusPoints();</span>
-
-<span style = "background-color:#dfd">	calculateGrade();</span>
+	calculateBonusPoints();
+	calculateGrades();</span>
 
 <span style = "background-color:#dfd">	printAttendanceDataWithGrade();	
 	printRemovedPlayer();

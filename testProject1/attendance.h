@@ -31,18 +31,76 @@ enum Grade {
 const int ATTENDANCE_BONUS_DAYS = 10;
 const int ATTENDANCE_BONUS_POINT = 10;
 
-class AttendanceManager {
+class AttendancePolicyInterface {
 public:
-	AttendanceManager(string inputFileName, int size) {
-		registerAttendanceDataFromFile(inputFileName, size);
+	virtual bool isEliminationCandidate(int grade, int countDayOfWeek[MAX_DAY_OF_WEEK]) = 0;
+	virtual int getPointForDayOfWeek(int indexDayOfWeek) = 0;
+	virtual int getBonusPoint(int countDayOfWeek[MAX_DAY_OF_WEEK]) = 0;
+	virtual int getGrade(int points) = 0;
+	virtual string getGradeString(int grade) = 0;
+};
+
+class AttendancePolicy : public AttendancePolicyInterface {
+public:
+
+	bool isEliminationCandidate(int grade, int countDayOfWeek[MAX_DAY_OF_WEEK]) override {
+
+		if (grade != GRADE_NORMAL) return false;
+		if (countDayOfWeek[WEDNESDAY] > 0) return false;
+		if (countDayOfWeek[SATURDAY] + countDayOfWeek[SUNDAY] > 0) return false;
+
+		return true;
 	}
 
-	AttendanceManager() {
-		clearAttendanceData();
+
+	int getPointForDayOfWeek(int indexDayOfWeek) override {
+		if (indexDayOfWeek == MONDAY || indexDayOfWeek == TUESDAY || indexDayOfWeek == THURSDAY || indexDayOfWeek == FRIDAY) {
+			return 1;
+		}
+
+		if (indexDayOfWeek == WEDNESDAY) {
+			return 3;
+		}
+
+		if (indexDayOfWeek == SATURDAY || indexDayOfWeek == SUNDAY) {
+			return 2;
+		}
+		return 0;
 	}
+
+	int getBonusPoint(int countDayOfWeek[MAX_DAY_OF_WEEK]) override {
+		if (countDayOfWeek[WEDNESDAY] >= ATTENDANCE_BONUS_DAYS) {
+			return ATTENDANCE_BONUS_POINT;
+		}
+
+		if (countDayOfWeek[SATURDAY] + countDayOfWeek[SUNDAY] >= ATTENDANCE_BONUS_DAYS) {
+			return ATTENDANCE_BONUS_POINT;
+		}
+		return 0;
+	}
+
+	int getGrade(int points) override {
+		if (points >= POINT_FOR_GOLD_GRADE) return GRADE_GOLD;
+		if (points >= POINT_FOR_SILVER_GRADE) return GRADE_SILVER;
+		return GRADE_NORMAL;
+	}
+
+	string getGradeString(int grade) {
+		switch (grade) {
+			case GRADE_GOLD: return "GOLD";
+			case GRADE_SILVER: return "SILVER";
+			default: return "NORMAL";
+		}
+	}
+};
+
+class AttendanceManager {
+public:
+	AttendanceManager(AttendancePolicyInterface* policy) : policy{ policy } {};
 
 	bool isInvalidID(int id);
 	bool isNotRegisteredName(string name);
+	//bool isEliminationCandidate(int id); // policy
 	int getIDByName(string name);
 	int getPointsByName(string name);
 	int getGradeByName(string name);
@@ -51,18 +109,19 @@ public:
 
 	void clearAttendanceData();
 	void registerID(string name);
-	int getPointOfDayIndex(int indexDayOfWeek);
+	//int getPointOfDayIndex(int indexDayOfWeek); // policy
 	int getIndexOfDay(string dayOfWeek);
 	void registerDayOfWeek(string name, string dayOfWeek);
 	void calculateAttendancePoints();
 	void registerAttendanceDataFromFile(string inputFileName, int size);
 	void registerUnitAttendanceData(string name, string dayOfWeek);
 	void calculateBonusPoints();
-	void calculateGrade();
+	void calculateGrades();
 	void printAttendanceDataWithGrade();
 	void printRemovedPlayer();
 	void analyzeAttendanceData();
 private:
+	AttendancePolicyInterface* policy;
 	map<string, int> idMapOfName;
 
 	int countDayOfWeek[MAX_ID_CNT][MAX_DAY_OF_WEEK];

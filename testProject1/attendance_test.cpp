@@ -11,7 +11,8 @@ const int ATTENDANCE_DATA_SIZE = 500;
 
 class AttendanceAnalyzerTest : public ::testing::Test {
 protected:
-	AttendanceManager attendManager;
+	AttendancePolicyInterface* policy = new AttendancePolicy();
+	AttendanceManager attendManager{policy};
 	void SetUp() override {
 		attendManager.clearAttendanceData();
 	}
@@ -188,7 +189,7 @@ TEST_F(AttendanceAnalyzerTest, calculateGrade) {
 	attendManager.calculateAttendancePoints();
 	attendManager.calculateBonusPoints();
 
-	attendManager.calculateGrade();
+	attendManager.calculateGrades();
 
 	EXPECT_EQ(attendManager.getPointsByName("Alice"), 72);
 	EXPECT_EQ(attendManager.getGradeByName("Alice"), GRADE_GOLD);
@@ -217,7 +218,7 @@ TEST_F(AttendanceAnalyzerTest, printAttendanceDataWithGrade) {
 
 	attendManager.calculateAttendancePoints();
 	attendManager.calculateBonusPoints();
-	attendManager.calculateGrade();
+	attendManager.calculateGrades();
 	EXPECT_NO_THROW(attendManager.printAttendanceDataWithGrade());
 }
 
@@ -237,7 +238,7 @@ TEST_F(AttendanceAnalyzerTest, printRemovedPlayer) {
 
 	attendManager.calculateAttendancePoints();
 	attendManager.calculateBonusPoints();
-	attendManager.calculateGrade();
+	attendManager.calculateGrades();
 	EXPECT_NO_THROW(attendManager.printRemovedPlayer());
 }
 

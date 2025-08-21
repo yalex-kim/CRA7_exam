@@ -12,7 +12,7 @@ void AttendanceManager::clearAttendanceData() {
 			countDayOfWeek[i][j] = 0;
 		}
 		points[i] = 0;
-		grade[i] = GRADE_NORMAL;
+		grade[i] = 0;
 		names[i] = "";
 		countOfWednesday[i] = 0;
 		countOfweekend[i] = 0;
@@ -23,20 +23,6 @@ void AttendanceManager::registerID(string name) {
 	if (idMapOfName.count(name) == 0) {
 		idMapOfName.insert({ name, idMapOfName.size() + 1 });
 		names[idMapOfName.size()] = name;
-	}
-}
-
-int AttendanceManager::getPointOfDayIndex(int indexDayOfWeek) {
-	if (indexDayOfWeek == MONDAY || indexDayOfWeek == TUESDAY || indexDayOfWeek == THURSDAY || indexDayOfWeek == FRIDAY) {
-		return 1;
-	}
-
-	if (indexDayOfWeek == WEDNESDAY) {
-		return 3;
-	}
-
-	if (indexDayOfWeek == SATURDAY || indexDayOfWeek == SUNDAY) {
-		return 2;
 	}
 }
 
@@ -106,7 +92,7 @@ int AttendanceManager::getCountDayOfWeek(string name, int indexDayOfWeek) {
 void AttendanceManager::calculateAttendancePoints() {
 	for (int id = 1; id <= idMapOfName.size(); id++) {
 		for (int indexDayOfWeek = 0; indexDayOfWeek < MAX_DAY_OF_WEEK; indexDayOfWeek++) {
-			points[id] += countDayOfWeek[id][indexDayOfWeek] * getPointOfDayIndex(indexDayOfWeek);
+			points[id] += countDayOfWeek[id][indexDayOfWeek] * policy->getPointForDayOfWeek(indexDayOfWeek);
 		}
 	}
 }
@@ -126,42 +112,11 @@ void AttendanceManager::registerAttendanceDataFromFile(string inputFileName, int
 	}
 }
 
-void AttendanceManager::calculateBonusPoints() {
-	for (int id = 1; id <= idMapOfName.size(); id++) {
-		if (countDayOfWeek[id][2] >= ATTENDANCE_BONUS_DAYS) {
-			points[id] += ATTENDANCE_BONUS_POINT;
-		}
-
-		if (countDayOfWeek[id][5] + countDayOfWeek[id][6] >= ATTENDANCE_BONUS_DAYS) {
-			points[id] += ATTENDANCE_BONUS_POINT;
-		}
-	}
-}
-
-void AttendanceManager::calculateGrade() {
-	for (int id = 1; id <= idMapOfName.size(); id++) {
-		if (points[id] >= POINT_FOR_GOLD_GRADE) {
-			grade[id] = GRADE_GOLD;
-		}
-		else if (points[id] >= POINT_FOR_SILVER_GRADE) {
-			grade[id] = GRADE_SILVER;
-		}
-		else {
-			grade[id] = GRADE_NORMAL;
-		}
-	}
-}
-
 void AttendanceManager::printAttendanceDataWithGrade() {
 	for (int id = 1; id <= idMapOfName.size(); id++) {
 		cout << "NAME : " << names[id] << ", ";
 		cout << "POINT : " << points[id] << ", ";
-		cout << "GRADE : ";
-
-		if (grade[id] == GRADE_GOLD) cout << "GOLD" << "\n";
-		else if (grade[id] == GRADE_SILVER) cout << "SILVER" << "\n";
-		else cout << "NORMAL" << "\n";
-
+		cout << "GRADE : " << policy->getGradeString(grade[id]) << "\n";
 	}
 }
 
@@ -170,18 +125,30 @@ void AttendanceManager::printRemovedPlayer() {
 	std::cout << "Removed player\n";
 	std::cout << "==============\n";
 	for (int id = 1; id <= idMapOfName.size(); id++) {
-
-		if (grade[id] != 1 && grade[id] != 2 && countOfWednesday[id] == 0 && countOfweekend[id] == 0) {
+		if (policy->isEliminationCandidate(grade[id], countDayOfWeek[id])) {
 			std::cout << names[id] << "\n";
 		}
+	}
+}
+
+void AttendanceManager::calculateBonusPoints() {
+	for (int id = 1; id <= idMapOfName.size(); id++) {
+		int bonusPoints = policy->getBonusPoint(countDayOfWeek[id]);
+		points[id] += bonusPoints;
+	}
+}
+
+
+void AttendanceManager::calculateGrades() {
+	for (int id = 1; id <= idMapOfName.size(); id++) {
+		grade[id] = policy->getGrade(points[id]);
 	}
 }
 
 void AttendanceManager::analyzeAttendanceData() {
 	calculateAttendancePoints();
 	calculateBonusPoints();
-
-	calculateGrade();
+	calculateGrades();
 
 	printAttendanceDataWithGrade();	
 	printRemovedPlayer();
