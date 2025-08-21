@@ -16,4 +16,5 @@
 - [ ] Design Pattern 적용
 - [ ] Grade 뿐 아니라 전체 정책(훈련 요일, 포인트 요일) 에 대한 모듈화를 진행하였으나 Policy 에 grade 를 추가할 수 있는 형태로 구현 필요.(출제 의도)
 
+# Coverage Capture
 <img width="1323" height="302" alt="image" src="https://github.com/user-attachments/assets/44860e1f-9e0e-4346-9c36-4446952f85c4" />
