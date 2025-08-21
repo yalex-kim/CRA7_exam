@@ -4,9 +4,6 @@
 
 using namespace std;
 
-const int POINT_FOR_GOLD_GRADE = 50;
-const int POINT_FOR_SILVER_GRADE = 30;
-
 enum DayOfWeek {
 	MONDAY = 0,
 	TUESDAY,
@@ -17,6 +14,9 @@ enum DayOfWeek {
 	SUNDAY
 };
 
+const int POINT_FOR_GOLD_GRADE = 50;
+const int POINT_FOR_SILVER_GRADE = 30;
+
 enum Grade {
 	GRADE_NORMAL = 0,
 	GRADE_GOLD = 1,
@@ -25,6 +25,12 @@ enum Grade {
 
 const int ATTENDANCE_BONUS_DAYS = 10;
 const int ATTENDANCE_BONUS_POINT = 10;
+
+class GradeInterface {
+public:
+	string name;
+	int refPoint;
+};
 
 class AttendancePolicyInterface {
 public:
