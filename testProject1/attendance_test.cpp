@@ -260,7 +260,7 @@ TEST_F(AttendanceAnalyzerTest, analyzeAttendanceData) {
 TEST_F(AttendanceAnalyzerTest, registerAttendanceDataFromFile) {	
 	attendManager.registerAttendanceDataFromFile(ATTENDANCE_FILE_NAME, ATTENDANCE_DATA_SIZE);
 	attendManager.analyzeAttendanceData();
-	EXPECT_EQ(attendManager.getCountOfID(), 19); // Assuming the file has 500 unique names
-	EXPECT_EQ(attendManager.getPointsByName("Alice"), 61); // Assuming Alice has 1 point in the file
-	EXPECT_EQ(attendManager.getGradeByName("Alice"), GRADE_GOLD); // Assuming Alice has normal grade
+	EXPECT_EQ(attendManager.getCountOfID(), 19);
+	EXPECT_EQ(attendManager.getPointsByName("Alice"), 61);
+	EXPECT_EQ(attendManager.getGradeByName("Alice"), GRADE_GOLD);
 }

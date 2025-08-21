@@ -9,7 +9,9 @@ int main () {
 	::testing::InitGoogleMock();
 	return RUN_ALL_TESTS();
 #else
-	AttendanceManager manager{ ATTENDANCE_FILE_NAME, ATTENDANCE_DATA_SIZE };
+	AttendancePolicyInterface* policy = new AttendancePolicy();
+	AttendanceManager manager{policy};
+	manager.registerAttendanceDataFromFile(ATTENDANCE_FILE_NAME, ATTENDANCE_DATA_SIZE);
 	manager.analyzeAttendanceData();
 	return 0;
 #endif
