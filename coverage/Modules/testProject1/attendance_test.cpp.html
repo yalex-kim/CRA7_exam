@@ -1,0 +1,291 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <meta charset="utf-8"/>
+	    <title>attendance_test.cpp</title>
+	    <link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	    <script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+    <body onload="prettyPrint()">
+        <h4></h4>
+        <pre class="prettyprint lang-cpp linenums">
+#include "gmock/gmock.h"
+#include "attendance.h"
+
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+
+using namespace testing;
+
+<span style = "background-color:#dfd">const string ATTENDANCE_FILE_NAME = "attendance_weekday_500.txt";</span>
+const int ATTENDANCE_DATA_SIZE = 500;
+
+class AttendanceAnalyzerTest : public ::testing::Test {
+protected:
+	AttendanceManager attendManager;
+<span style = "background-color:#dfd">	void SetUp() override {
+		attendManager.clearAttendanceData();
+	}
+	void TearDown() override {
+	}</span>
+};
+
+class ifstreamMock : public std::ifstream {
+public:
+	ifstreamMock(const std::string&amp; filename) : std::ifstream(filename) {};
+	MOCK_METHOD(void, open, (const std::string&amp; filename));
+	MOCK_METHOD(void, close, ());
+	//MOCK_METHOD(std::ifstream&amp;, operator&gt;&gt;(std::istream&amp;), (override));	
+};
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, registerID) {
+	attendManager.registerID("Alice");
+	attendManager.registerID("Bob");</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getCountOfID(), 2);
+	EXPECT_EQ(attendManager.getIDByName("Alice"), 1);
+	EXPECT_EQ(attendManager.getIDByName("Bob"), 2);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, registerIDException) {
+	attendManager.registerID("Alice");
+	attendManager.registerID("Bob");</span>
+
+<span style = "background-color:#dfd">	attendManager.registerID("Alice");</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getCountOfID(), 2);
+	EXPECT_EQ(attendManager.getIDByName("Alice"), 1);
+	EXPECT_EQ(attendManager.getIDByName("Bob"), 2);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, getIDByNameException) {
+	attendManager.registerID("Alice");
+	attendManager.registerID("Bob");</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getIDByName("Charlie"), -1);
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, registerDayOfWeek) {
+	attendManager.registerID("Alice");
+	attendManager.registerID("Bob");
+	attendManager.registerID("Charlie");
+	attendManager.registerID("David");
+	attendManager.registerID("Eve");
+	attendManager.registerID("Frank");
+	attendManager.registerID("Grace");</span>
+
+<span style = "background-color:#dfd">	attendManager.registerDayOfWeek("Alice", "monday");
+	attendManager.registerDayOfWeek("Bob", "tuesday");
+	attendManager.registerDayOfWeek("Charlie", "wednesday");
+	attendManager.registerDayOfWeek("David", "thursday");
+	attendManager.registerDayOfWeek("Eve", "friday");
+	attendManager.registerDayOfWeek("Frank", "saturday");
+	attendManager.registerDayOfWeek("Grace", "sunday");</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getCountOfID(), 7);
+	EXPECT_EQ(attendManager.getCountDayOfWeek("Alice", MONDAY), 1);
+	EXPECT_EQ(attendManager.getCountDayOfWeek("Bob", TUESDAY), 1);
+	EXPECT_EQ(attendManager.getCountDayOfWeek("Charlie", WEDNESDAY), 1);
+	EXPECT_EQ(attendManager.getCountDayOfWeek("David", THURSDAY), 1);
+	EXPECT_EQ(attendManager.getCountDayOfWeek("Eve", FRIDAY), 1);
+	EXPECT_EQ(attendManager.getCountDayOfWeek("Frank", SATURDAY), 1);
+	EXPECT_EQ(attendManager.getCountDayOfWeek("Grace", SUNDAY), 1);</span>
+
+<span style = "background-color:#dfd">}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, registerDayOfWeekException) {
+	attendManager.registerID("Alice");</span>
+
+<span style = "background-color:#dfd">	attendManager.registerDayOfWeek("Alice", "invalidDay");</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getCountOfID(), 1);
+	EXPECT_THAT(attendManager.getCountDayOfWeek("Alice", MONDAY), Eq(0));
+	EXPECT_THAT(attendManager.getCountDayOfWeek("Alice", TUESDAY), Eq(0));
+	EXPECT_THAT(attendManager.getCountDayOfWeek("Alice", WEDNESDAY), Eq(0));
+	EXPECT_THAT(attendManager.getCountDayOfWeek("Alice", THURSDAY), Eq(0));
+	EXPECT_THAT(attendManager.getCountDayOfWeek("Alice", FRIDAY), Eq(0));
+	EXPECT_THAT(attendManager.getCountDayOfWeek("Alice", SATURDAY), Eq(0));
+	EXPECT_THAT(attendManager.getCountDayOfWeek("Alice", SUNDAY), Eq(0));
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, registerUnitAttendanceData) {
+	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Bob", "tuesday");</span>
+
+<span style = "background-color:#dfd">	EXPECT_THAT(attendManager.getCountDayOfWeek("Alice", MONDAY), Eq(1));
+	EXPECT_THAT(attendManager.getCountDayOfWeek("Bob", TUESDAY), Eq(1));
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, calculateAttendancePoints) {</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Alice", "tuesday");
+	attendManager.registerUnitAttendanceData("Alice", "wednesday");
+	attendManager.registerUnitAttendanceData("Bob", "thursday");
+	attendManager.registerUnitAttendanceData("Bob", "saturday");</span>
+
+<span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();</span>
+	
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getPointsByName("Alice"), 5); // Alice: 1+1+3
+	EXPECT_EQ(attendManager.getPointsByName("Bob"), 3); // Bob: 1+2
+}</span>
+
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, calculateBonusPointsForWednesday) {</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Alice", "tuesday");
+	for(int i = 0; i &lt; 10; i++) {
+		attendManager.registerUnitAttendanceData("Alice", "wednesday");
+	}</span>
+
+<span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();
+	attendManager.calculateBonusPoints();</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getPointsByName("Alice"), 42); // Alice: 1+1+3
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, calculateBonusPointsForWekend) {</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Alice", "tuesday");
+	for (int i = 0; i &lt; 10; i++) {
+		attendManager.registerUnitAttendanceData("Alice", "saturday");
+	}</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Bob", "monday");
+	attendManager.registerUnitAttendanceData("Bob", "tuesday");
+	for (int i = 0; i &lt; 10; i++) {
+		attendManager.registerUnitAttendanceData("Bob", "sunday");
+	}</span>
+
+<span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();
+	attendManager.calculateBonusPoints();</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getPointsByName("Alice"), 32); // Alice: 1+1+3
+	EXPECT_EQ(attendManager.getPointsByName("Bob"), 32); // Alice: 1+1+3
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, getPointOfDayIndexException) {</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Alice", "tuesday");
+	attendManager.registerUnitAttendanceData("Alice", "wednesday");
+	attendManager.registerUnitAttendanceData("Bob", "thursday");
+	attendManager.registerUnitAttendanceData("Bob", "saturday");</span>
+
+<span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getPointsByName("Alice"), 5); // Alice: 1+1+3
+	EXPECT_EQ(attendManager.getPointsByName("Bob"), 3); // Bob: 1+2
+}</span>
+
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, calculateGrade) {</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Alice", "tuesday");
+	for (int i = 0; i &lt; 20; i++) {
+		attendManager.registerUnitAttendanceData("Alice", "wednesday");
+	}
+	attendManager.registerUnitAttendanceData("Bob", "monday");
+	attendManager.registerUnitAttendanceData("Bob", "tuesday");
+	for (int i = 0; i &lt; 10; i++) {
+		attendManager.registerUnitAttendanceData("Bob", "sunday");
+	}</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Charlie", "monday");</span>
+
+<span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();
+	attendManager.calculateBonusPoints();</span>
+
+<span style = "background-color:#dfd">	attendManager.calculateGrade();</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getPointsByName("Alice"), 72);
+	EXPECT_EQ(attendManager.getGradeByName("Alice"), GRADE_GOLD);</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getPointsByName("Bob"), 32);
+	EXPECT_EQ(attendManager.getGradeByName("Bob"), GRADE_SILVER);</span>
+
+<span style = "background-color:#dfd">	EXPECT_EQ(attendManager.getPointsByName("Charlie"), 1);
+	EXPECT_EQ(attendManager.getGradeByName("Charlie"), GRADE_NORMAL);</span>
+
+<span style = "background-color:#dfd">}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, printAttendanceDataWithGrade) {
+	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Alice", "tuesday");
+	for (int i = 0; i &lt; 20; i++) {
+		attendManager.registerUnitAttendanceData("Alice", "wednesday");
+	}
+	attendManager.registerUnitAttendanceData("Bob", "monday");
+	attendManager.registerUnitAttendanceData("Bob", "tuesday");
+	for (int i = 0; i &lt; 10; i++) {
+		attendManager.registerUnitAttendanceData("Bob", "sunday");
+	}</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Charlie", "monday");</span>
+
+<span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();
+	attendManager.calculateBonusPoints();
+	attendManager.calculateGrade();
+	EXPECT_NO_THROW(attendManager.printAttendanceDataWithGrade());
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, printRemovedPlayer) {
+	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Alice", "tuesday");
+	for (int i = 0; i &lt; 20; i++) {
+		attendManager.registerUnitAttendanceData("Alice", "wednesday");
+	}
+	attendManager.registerUnitAttendanceData("Bob", "monday");
+	attendManager.registerUnitAttendanceData("Bob", "tuesday");
+	for (int i = 0; i &lt; 10; i++) {
+		attendManager.registerUnitAttendanceData("Bob", "sunday");
+	}</span>
+
+<span style = "background-color:#dfd">	attendManager.registerUnitAttendanceData("Charlie", "monday");</span>
+
+<span style = "background-color:#dfd">	attendManager.calculateAttendancePoints();
+	attendManager.calculateBonusPoints();
+	attendManager.calculateGrade();
+	EXPECT_NO_THROW(attendManager.printRemovedPlayer());
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, analyzeAttendanceData) {
+	attendManager.registerUnitAttendanceData("Alice", "monday");
+	attendManager.registerUnitAttendanceData("Alice", "tuesday");
+	for (int i = 0; i &lt; 20; i++) {
+		attendManager.registerUnitAttendanceData("Alice", "wednesday");
+	}
+	attendManager.registerUnitAttendanceData("Bob", "monday");
+	attendManager.registerUnitAttendanceData("Bob", "tuesday");
+	for (int i = 0; i &lt; 10; i++) {
+		attendManager.registerUnitAttendanceData("Bob", "sunday");
+	}
+	attendManager.registerUnitAttendanceData("Charlie", "monday");
+	EXPECT_NO_THROW(attendManager.analyzeAttendanceData());
+}</span>
+
+<span style = "background-color:#dfd">TEST_F(AttendanceAnalyzerTest, registerAttendanceDataFromFile) {	
+	attendManager.registerAttendanceDataFromFile(ATTENDANCE_FILE_NAME, ATTENDANCE_DATA_SIZE);
+	attendManager.analyzeAttendanceData();
+	EXPECT_EQ(attendManager.getCountOfID(), 19); // Assuming the file has 500 unique names
+	EXPECT_EQ(attendManager.getPointsByName("Alice"), 61); // Assuming Alice has 1 point in the file
+	EXPECT_EQ(attendManager.getGradeByName("Alice"), GRADE_GOLD); // Assuming Alice has normal grade
+}</span></pre>
+        <hr />
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th align="center">
+                        <small>Generated by</small>
+                        <a href="https://github.com/OpenCppCoverage/OpenCppCoverage/releases">
+                            <strong>OpenCppCoverage (Version: 0.9.9.0)</strong>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>

@@ -124,6 +124,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="attendance.cpp" />
+    <ClCompile Include="attendance_test.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -131,6 +135,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="attendance_weekday_500.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="attendance.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

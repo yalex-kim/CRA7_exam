@@ -152,7 +152,7 @@ void printAttendanceDataWithGrade() {
 		cout << "GRADE : ";
 
 		if (grade[id] == GRADE_GOLD) cout << "GOLD" << "\n";
-		if (grade[id] == GRADE_SILVER) cout << "SILVER" << "\n";
+		else if (grade[id] == GRADE_SILVER) cout << "SILVER" << "\n";
 		else cout << "NORMAL" << "\n";
 
 	}

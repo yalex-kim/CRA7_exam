@@ -1,79 +1,46 @@
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <vector>
-#include <map>
 #include <algorithm>
-
-#include "gmock/gmock.h"
+#include "attendance.h"
 
 using namespace std;
 
+void AttendanceManager::clearAttendanceData() {
+	idMapOfName.clear();
+	for (int i = 0; i < MAX_ID_CNT; i++) {
+		for (int j = 0; j < MAX_DAY_OF_WEEK; j++) {
+			countDayOfWeek[i][j] = 0;
+		}
+		points[i] = 0;
+		grade[i] = GRADE_NORMAL;
+		names[i] = "";
+		countOfWednesday[i] = 0;
+		countOfweekend[i] = 0;
+	}
+}
 
-const string ATTENDANCE_FILE_NAME = "attendance_weekday_500.txt";
-const int ATTENDANCE_DATA_SIZE = 500;
-
-enum DayOfWeek {
-	MONDAY = 0,
-	TUESDAY,
-	WEDNESDAY,
-	THURSDAY,
-	FRIDAY,
-	SATURDAY,
-	SUNDAY
-};
-
-const int POINT_FOR_GOLD_GRADE = 50;
-const int POINT_FOR_SILVER_GRADE = 30;
-
-enum Grade {
-	GRADE_NORMAL = 0,
-	GRADE_GOLD = 1,
-	GRADE_SILVER = 2,
-};
-
-#define MAX_ID_CNT 100
-#define MAX_DAY_OF_WEEK 7
-
-const int ATTENDANCE_BONUS_DAYS = 10;
-const int ATTENDANCE_BONUS_POINT = 10;
-
-map<string, int> idMapOfName;
-
-int countDayOfWeek[MAX_ID_CNT][MAX_DAY_OF_WEEK];
-int points[MAX_ID_CNT];
-int grade[MAX_ID_CNT];
-string names[MAX_ID_CNT];
-
-int countOfWednesday[MAX_ID_CNT];
-int countOfweekend[MAX_ID_CNT];
-
-
-void registerID(string name) {
+void AttendanceManager::registerID(string name) {
 	if (idMapOfName.count(name) == 0) {
 		idMapOfName.insert({ name, idMapOfName.size() + 1 });
 		names[idMapOfName.size()] = name;
 	}
 }
 
-int getPointOfDayIndex(int indexDayOfWeek) {
-	switch (indexDayOfWeek) {
-		case MONDAY:
-		case TUESDAY:
-		case THURSDAY:
-		case FRIDAY:
-			return 1;
-		case WEDNESDAY:
-			return 3;
-		case SATURDAY:
-		case SUNDAY:
-			return 2;
-		default:
-			return 0;
+int AttendanceManager::getPointOfDayIndex(int indexDayOfWeek) {
+	if (indexDayOfWeek == MONDAY || indexDayOfWeek == TUESDAY || indexDayOfWeek == THURSDAY || indexDayOfWeek == FRIDAY) {
+		return 1;
+	}
+
+	if (indexDayOfWeek == WEDNESDAY) {
+		return 3;
+	}
+
+	if (indexDayOfWeek == SATURDAY || indexDayOfWeek == SUNDAY) {
+		return 2;
 	}
 }
 
-int getIndexOfDay(string dayOfWeek) {
+int AttendanceManager::getIndexOfDay(string dayOfWeek) {
 	if (dayOfWeek == "monday") return MONDAY;
 	if (dayOfWeek == "tuesday") return TUESDAY;
 	if (dayOfWeek == "wednesday") return WEDNESDAY;
@@ -84,8 +51,38 @@ int getIndexOfDay(string dayOfWeek) {
 	return -1;
 }
 
-void registerDayOfWeek(string name, string dayOfWeek) {
-	int id = idMapOfName[name];
+bool AttendanceManager::isInvalidID(int id) {
+	return (id < 1 || id > MAX_ID_CNT);
+}
+
+bool AttendanceManager::isNotRegisteredName(string name) {
+	return idMapOfName.count(name) == 0;
+}
+
+int AttendanceManager::getIDByName(string name) {
+	if (isNotRegisteredName(name)) return -1;
+	return idMapOfName[name];
+
+}
+
+int AttendanceManager::getPointsByName(string name) {
+	int id = getIDByName(name);
+	if (isInvalidID(id)) return -1;
+	return points[id];
+}
+
+int AttendanceManager::getGradeByName(string name) {
+	int id = getIDByName(name);
+	if (isInvalidID(id)) return -1;
+	return grade[id];
+}
+
+int AttendanceManager::getCountOfID() {
+	return (int)idMapOfName.size();
+}
+
+void AttendanceManager::registerDayOfWeek(string name, string dayOfWeek) {
+	int id = getIDByName(name);
 	int index = getIndexOfDay(dayOfWeek);
 	if (index == -1) return;
 
@@ -100,7 +97,13 @@ void registerDayOfWeek(string name, string dayOfWeek) {
 	}
 }
 
-void calculateAttendancePoints() {
+int AttendanceManager::getCountDayOfWeek(string name, int indexDayOfWeek) {
+	int id = getIDByName(name);
+	if (id < 1 || id >= MAX_ID_CNT) return 0;
+	return countDayOfWeek[id][indexDayOfWeek];
+}
+
+void AttendanceManager::calculateAttendancePoints() {
 	for (int id = 1; id <= idMapOfName.size(); id++) {
 		for (int indexDayOfWeek = 0; indexDayOfWeek < MAX_DAY_OF_WEEK; indexDayOfWeek++) {
 			points[id] += countDayOfWeek[id][indexDayOfWeek] * getPointOfDayIndex(indexDayOfWeek);
@@ -108,18 +111,22 @@ void calculateAttendancePoints() {
 	}
 }
 
-void registerAttendanceData(string inputFileName, int size)
+void AttendanceManager::registerUnitAttendanceData(string name, string dayOfWeek) {
+	registerID(name);
+	registerDayOfWeek(name, dayOfWeek);
+}
+
+void AttendanceManager::registerAttendanceDataFromFile(string inputFileName, int size)
 {
 	ifstream fin{ inputFileName };
 	for (int i = 0; i <size ; i++) {
 		string name, dayOfWeek;
 		fin >> name >> dayOfWeek;
-		registerID(name);
-		registerDayOfWeek(name, dayOfWeek);
+		registerUnitAttendanceData(name, dayOfWeek);
 	}
 }
 
-void calculateBonusPoints() {
+void AttendanceManager::calculateBonusPoints() {
 	for (int id = 1; id <= idMapOfName.size(); id++) {
 		if (countDayOfWeek[id][2] >= ATTENDANCE_BONUS_DAYS) {
 			points[id] += ATTENDANCE_BONUS_POINT;
@@ -131,7 +138,7 @@ void calculateBonusPoints() {
 	}
 }
 
-void calculateGrade() {
+void AttendanceManager::calculateGrade() {
 	for (int id = 1; id <= idMapOfName.size(); id++) {
 		if (points[id] >= POINT_FOR_GOLD_GRADE) {
 			grade[id] = GRADE_GOLD;
@@ -145,20 +152,20 @@ void calculateGrade() {
 	}
 }
 
-void printAttendanceDataWithGrade() {
+void AttendanceManager::printAttendanceDataWithGrade() {
 	for (int id = 1; id <= idMapOfName.size(); id++) {
 		cout << "NAME : " << names[id] << ", ";
 		cout << "POINT : " << points[id] << ", ";
 		cout << "GRADE : ";
 
 		if (grade[id] == GRADE_GOLD) cout << "GOLD" << "\n";
-		if (grade[id] == GRADE_SILVER) cout << "SILVER" << "\n";
+		else if (grade[id] == GRADE_SILVER) cout << "SILVER" << "\n";
 		else cout << "NORMAL" << "\n";
 
 	}
 }
 
-void printRemovedPlayer() {
+void AttendanceManager::printRemovedPlayer() {
 	std::cout << "\n";
 	std::cout << "Removed player\n";
 	std::cout << "==============\n";
@@ -170,9 +177,7 @@ void printRemovedPlayer() {
 	}
 }
 
-void analyzeAttendanceData() {
-	registerAttendanceData(ATTENDANCE_FILE_NAME, ATTENDANCE_DATA_SIZE);
-
+void AttendanceManager::analyzeAttendanceData() {
 	calculateAttendancePoints();
 	calculateBonusPoints();
 
@@ -180,14 +185,4 @@ void analyzeAttendanceData() {
 
 	printAttendanceDataWithGrade();	
 	printRemovedPlayer();
-}
-
-int main() {
-#ifdef _DEBUG
-	::testing::InitGoogleMock();
-	return RUN_ALL_TESTS();
-#else
-	analyzeAttendanceData();
-#endif
-	
 }

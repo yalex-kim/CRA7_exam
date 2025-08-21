@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <meta charset="utf-8"/>
+	    <title>attendance.cpp</title>
+	    <link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	    <script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+    <body onload="prettyPrint()">
+        <h4></h4>
+        <pre class="prettyprint lang-cpp linenums">
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;algorithm&gt;
+#include "attendance.h"
+
+using namespace std;
+
+<span style = "background-color:#dfd">void AttendanceManager::clearAttendanceData() {
+	idMapOfName.clear();
+	for (int i = 0; i &lt; MAX_ID_CNT; i++) {
+		for (int j = 0; j &lt; MAX_DAY_OF_WEEK; j++) {
+			countDayOfWeek[i][j] = 0;
+		}
+		points[i] = 0;
+		grade[i] = GRADE_NORMAL;
+		names[i] = "";
+		countOfWednesday[i] = 0;
+		countOfweekend[i] = 0;
+	}
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::registerID(string name) {
+	if (idMapOfName.count(name) == 0) {
+		idMapOfName.insert({ name, idMapOfName.size() + 1 });
+		names[idMapOfName.size()] = name;</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+<span style = "background-color:#dfd">int AttendanceManager::getPointOfDayIndex(int indexDayOfWeek) {
+	if (indexDayOfWeek == MONDAY || indexDayOfWeek == TUESDAY || indexDayOfWeek == THURSDAY || indexDayOfWeek == FRIDAY) {
+		return 1;</span>
+	}
+
+<span style = "background-color:#dfd">	if (indexDayOfWeek == WEDNESDAY) {
+		return 3;</span>
+	}
+
+<span style = "background-color:#dfd">	if (indexDayOfWeek == SATURDAY || indexDayOfWeek == SUNDAY) {
+		return 2;</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+<span style = "background-color:#dfd">int AttendanceManager::getIndexOfDay(string dayOfWeek) {
+	if (dayOfWeek == "monday") return MONDAY;
+	if (dayOfWeek == "tuesday") return TUESDAY;
+	if (dayOfWeek == "wednesday") return WEDNESDAY;
+	if (dayOfWeek == "thursday") return THURSDAY;
+	if (dayOfWeek == "friday") return FRIDAY;
+	if (dayOfWeek == "saturday") return SATURDAY;
+	if (dayOfWeek == "sunday") return SUNDAY;
+	return -1;
+}</span>
+
+<span style = "background-color:#dfd">bool AttendanceManager::isInvalidID(int id) {
+	return (id &lt; 1 || id &gt; MAX_ID_CNT);
+}</span>
+
+<span style = "background-color:#dfd">bool AttendanceManager::isNotRegisteredName(string name) {
+	return idMapOfName.count(name) == 0;
+}</span>
+
+<span style = "background-color:#dfd">int AttendanceManager::getIDByName(string name) {
+	if (isNotRegisteredName(name)) return -1;
+	return idMapOfName[name];</span>
+
+<span style = "background-color:#dfd">}</span>
+
+<span style = "background-color:#dfd">int AttendanceManager::getPointsByName(string name) {
+	int id = getIDByName(name);
+	if (isInvalidID(id)) return -1;
+	return points[id];
+}</span>
+
+<span style = "background-color:#dfd">int AttendanceManager::getGradeByName(string name) {
+	int id = getIDByName(name);
+	if (isInvalidID(id)) return -1;
+	return grade[id];
+}</span>
+
+<span style = "background-color:#dfd">int AttendanceManager::getCountOfID() {
+	return (int)idMapOfName.size();
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::registerDayOfWeek(string name, string dayOfWeek) {
+	int id = getIDByName(name);
+	int index = getIndexOfDay(dayOfWeek);
+	if (index == -1) return;</span>
+
+<span style = "background-color:#dfd">	countDayOfWeek[id][index]++;</span>
+
+<span style = "background-color:#dfd">	if (dayOfWeek == "wednesday") {
+		countOfWednesday[id]++;</span>
+	}
+	
+<span style = "background-color:#dfd">	if (dayOfWeek == "saturday" || dayOfWeek == "sunday") {
+		countOfweekend[id]++;</span>
+	}
+<span style = "background-color:#dfd">}</span>
+
+<span style = "background-color:#dfd">int AttendanceManager::getCountDayOfWeek(string name, int indexDayOfWeek) {
+	int id = getIDByName(name);
+	if (id &lt; 1 || id &gt;= MAX_ID_CNT) return 0;
+	return countDayOfWeek[id][indexDayOfWeek];
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::calculateAttendancePoints() {
+	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
+		for (int indexDayOfWeek = 0; indexDayOfWeek &lt; MAX_DAY_OF_WEEK; indexDayOfWeek++) {
+			points[id] += countDayOfWeek[id][indexDayOfWeek] * getPointOfDayIndex(indexDayOfWeek);
+		}
+	}
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::registerUnitAttendanceData(string name, string dayOfWeek) {
+	registerID(name);
+	registerDayOfWeek(name, dayOfWeek);
+}</span>
+
+void AttendanceManager::registerAttendanceDataFromFile(string inputFileName, int size)
+<span style = "background-color:#dfd">{
+	ifstream fin{ inputFileName };
+	for (int i = 0; i &lt;size ; i++) {
+		string name, dayOfWeek;
+		fin &gt;&gt; name &gt;&gt; dayOfWeek;
+		registerUnitAttendanceData(name, dayOfWeek);
+	}
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::calculateBonusPoints() {
+	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
+		if (countDayOfWeek[id][2] &gt;= ATTENDANCE_BONUS_DAYS) {
+			points[id] += ATTENDANCE_BONUS_POINT;</span>
+		}
+
+<span style = "background-color:#dfd">		if (countDayOfWeek[id][5] + countDayOfWeek[id][6] &gt;= ATTENDANCE_BONUS_DAYS) {
+			points[id] += ATTENDANCE_BONUS_POINT;</span>
+		}
+<span style = "background-color:#dfd">	}
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::calculateGrade() {
+	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
+		if (points[id] &gt;= POINT_FOR_GOLD_GRADE) {
+			grade[id] = GRADE_GOLD;
+		}
+		else if (points[id] &gt;= POINT_FOR_SILVER_GRADE) {
+			grade[id] = GRADE_SILVER;
+		}</span>
+		else {
+<span style = "background-color:#dfd">			grade[id] = GRADE_NORMAL;</span>
+		}
+<span style = "background-color:#dfd">	}
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::printAttendanceDataWithGrade() {
+	for (int id = 1; id &lt;= idMapOfName.size(); id++) {
+		cout &lt;&lt; "NAME : " &lt;&lt; names[id] &lt;&lt; ", ";
+		cout &lt;&lt; "POINT : " &lt;&lt; points[id] &lt;&lt; ", ";
+		cout &lt;&lt; "GRADE : ";</span>
+
+<span style = "background-color:#dfd">		if (grade[id] == GRADE_GOLD) cout &lt;&lt; "GOLD" &lt;&lt; "\n";
+		else if (grade[id] == GRADE_SILVER) cout &lt;&lt; "SILVER" &lt;&lt; "\n";
+		else cout &lt;&lt; "NORMAL" &lt;&lt; "\n";</span>
+
+<span style = "background-color:#dfd">	}
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::printRemovedPlayer() {
+	std::cout &lt;&lt; "\n";
+	std::cout &lt;&lt; "Removed player\n";
+	std::cout &lt;&lt; "==============\n";
+	for (int id = 1; id &lt;= idMapOfName.size(); id++) {</span>
+
+<span style = "background-color:#dfd">		if (grade[id] != 1 &amp;&amp; grade[id] != 2 &amp;&amp; countOfWednesday[id] == 0 &amp;&amp; countOfweekend[id] == 0) {
+			std::cout &lt;&lt; names[id] &lt;&lt; "\n";</span>
+		}
+<span style = "background-color:#dfd">	}
+}</span>
+
+<span style = "background-color:#dfd">void AttendanceManager::analyzeAttendanceData() {
+	calculateAttendancePoints();
+	calculateBonusPoints();</span>
+
+<span style = "background-color:#dfd">	calculateGrade();</span>
+
+<span style = "background-color:#dfd">	printAttendanceDataWithGrade();	
+	printRemovedPlayer();
+}</span></pre>
+        <hr />
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th align="center">
+                        <small>Generated by</small>
+                        <a href="https://github.com/OpenCppCoverage/OpenCppCoverage/releases">
+                            <strong>OpenCppCoverage (Version: 0.9.9.0)</strong>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>
