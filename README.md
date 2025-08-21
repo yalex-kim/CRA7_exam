@@ -1,17 +1,19 @@
-# ¿ä±¸»çÇ× Ã¼Å©¸®½ºÆ® 
+# ìš”êµ¬ì‚¬í•­ ì²´í¬ë¦¬ìŠ¤íŠ¸ 
 
-1. ÇÔ¼ö ·¹º§¸®ÆÑÅä¸µ
-- [X] D1 - °¡µ¶¼ºÀÖ´Â ÄÚµå·Î ¸Þ¼­µåÃß»óÈ­, °¡µ¶¼ºÁÁÀº³×ÀÌ¹Ö»ç¿ë
-2. Å¬·¡½º ·¹º§ ¸®ÆÑÅä¸µ
-- [X] D2 - Regression Test¸¦ À§ÇÑ Unit Test °³¹ß
-- [X] D3 - È®Àå¼ºÀ» °í·ÁÇÑ ¼³°è, Á¤Ã¥°ú µî±ÞÀÌ Ãß°¡µÇ´õ¶óµµ Client Code¿¡ º¯°æÀÌ ¾øµµ·Ï ÇÑ´Ù.
-3. µðÀÚÀÎ ÆÐÅÏ»ç¿ëÇÏ±â
-- [ ] D4 - ¸®ÆÑÅä¸µ¿¡ µðÀÚÀÎ ÆÐÅÏÀ» Àû¿ëÇÑ´Ù.
- 4. ÄÚµå Ä¿¹ö¸®Áö100%
-- [X] D5 - ¸®ÆÑÅä¸µÀÌ ³¡³­ ÄÚµå¿¡, ÄÚµå Ä¿¹ö¸®Áö°¡ 100% µÇ¾î¾ßÇÑ´Ù.
+1. í•¨ìˆ˜ ë ˆë²¨ë¦¬íŒ©í† ë§
+- [X] D1 - ê°€ë…ì„±ìžˆëŠ” ì½”ë“œë¡œ ë©”ì„œë“œì¶”ìƒí™”, ê°€ë…ì„±ì¢‹ì€ë„¤ì´ë°ì‚¬ìš©
+2. í´ëž˜ìŠ¤ ë ˆë²¨ ë¦¬íŒ©í† ë§
+- [X] D2 - Regression Testë¥¼ ìœ„í•œ Unit Test ê°œë°œ
+- [X] D3 - í™•ìž¥ì„±ì„ ê³ ë ¤í•œ ì„¤ê³„, ì •ì±…ê³¼ ë“±ê¸‰ì´ ì¶”ê°€ë˜ë”ë¼ë„ Client Codeì— ë³€ê²½ì´ ì—†ë„ë¡ í•œë‹¤.
+3. ë””ìžì¸ íŒ¨í„´ì‚¬ìš©í•˜ê¸°
+- [ ] D4 - ë¦¬íŒ©í† ë§ì— ë””ìžì¸ íŒ¨í„´ì„ ì ìš©í•œë‹¤.
+ 4. ì½”ë“œ ì»¤ë²„ë¦¬ì§€100%
+- [X] D5 - ë¦¬íŒ©í† ë§ì´ ëë‚œ ì½”ë“œì—, ì½”ë“œ ì»¤ë²„ë¦¬ì§€ê°€ 100% ë˜ì–´ì•¼í•œë‹¤.
 
 
-# Ãß°¡·Î ¼öÁ¤ ÇÊ¿äÇÑ ºÎºÐ
+# ì¶”ê°€ë¡œ ìˆ˜ì • í•„ìš”í•œ ë¶€ë¶„
 - [ ] TC Code Refactoring
-- [ ] Design Pattern Àû¿ë
-- [ ] Grade »Ó ¾Æ´Ï¶ó ÀüÃ¼ Á¤Ã¥(ÈÆ·Ã ¿äÀÏ, Æ÷ÀÎÆ® ¿äÀÏ) ¿¡ ´ëÇÑ ¸ðµâÈ­¸¦ ÁøÇàÇÏ¿´À¸³ª Policy ¿¡ grade ¸¦ Ãß°¡ÇÒ ¼ö ÀÖ´Â ÇüÅÂ·Î ±¸Çö ÇÊ¿ä.(ÃâÁ¦ ÀÇµµ)
+- [ ] Design Pattern ì ìš©
+- [ ] Grade ë¿ ì•„ë‹ˆë¼ ì „ì²´ ì •ì±…(í›ˆë ¨ ìš”ì¼, í¬ì¸íŠ¸ ìš”ì¼) ì— ëŒ€í•œ ëª¨ë“ˆí™”ë¥¼ ì§„í–‰í•˜ì˜€ìœ¼ë‚˜ Policy ì— grade ë¥¼ ì¶”ê°€í•  ìˆ˜ ìžˆëŠ” í˜•íƒœë¡œ êµ¬í˜„ í•„ìš”.(ì¶œì œ ì˜ë„)
+
+<img width="1323" height="302" alt="image" src="https://github.com/user-attachments/assets/44860e1f-9e0e-4346-9c36-4446952f85c4" />
